@@ -1,32 +1,24 @@
 version: '3'
 
 services:
-  # Base container with VNC, noVNC, and Chrome
-  vnc:
-    image: kasmweb/chrome:1.15.0
-    container_name: vnc-chrome
+  vnc-desktop:
+    image: linuxserver/webtop:ubuntu-xfce
+    container_name: vnc-desktop
     environment:
-      - VNC_PW=password123
-      - RESOLUTION=1920x1080
-      - KASM_SVC_AUDIO=1
-      - KASM_SVC_AUDIO_CODEC=opus
-      - KASM_SVC_AUDIO_SAMPLE_RATE=48000
-      - KASM_SVC_AUDIO_FRAME_DURATION=20
-      - KASM_SVC_AUDIO_BITRATE=128
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - KEYBOARD=en-us-qwerty
+      - PASSWORD=password123
+      - WEBPAGE_TITLE=VNC_Desktop
     ports:
-      - "5000:6901"  # Web interface with noVNC + WebRTC audio on port 5000
+      - "5000:3000"  # Web interface on port 5000
     volumes:
-      - chrome_data:/home/kasm-user/Downloads
+      - webtop_data:/config
+    devices:
+      - /dev/snd:/dev/snd  # Pass sound device to container if available
     restart: unless-stopped
-    shm_size: 2gb  # Increase shared memory for better browser performance
-    cap_add:
-      - SYS_ADMIN  # Needed for audio capabilities
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6901/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+    shm_size: 2gb
 
 volumes:
-  chrome_data:
+  webtop_data:
